@@ -27,14 +27,11 @@ Now that the caveats are out of the way, lets walk through a few examples of pul
 ```python
 # username and password correspond to the websites login page
 FHLB = Client(username,password)
-```
-##### Request Outstanding Advances
-```python 
+
+# request outstanding advances
 advances = FHLB.advances('2019-02-01')
-```
-##### Response
-```python
-[{'Trade Date': '2011-05-30', 'Funding Date': '2011-06-01', 'Maturity Date': '2019-06-15', 'Advance Number': 192511.0, 'Advance Type': 'FRC', 'Current Par ($)': 100000.0, 'Interest Rate (%)': 1.23, 'Next Interest Payment Date': '2019-02-08', 'Accrued Interest ($)': 1835.15, 'Estimated Next Interest Payment ($)': 18591.81, 'Details': 'View'}, 
+
+>>>[{'Trade Date': '2011-05-30', 'Funding Date': '2011-06-01', 'Maturity Date': '2019-06-15', 'Advance Number': 192511.0, 'Advance Type': 'FRC', 'Current Par ($)': 100000.0, 'Interest Rate (%)': 1.23, 'Next Interest Payment Date': '2019-02-08', 'Accrued Interest ($)': 1835.15, 'Estimated Next Interest Payment ($)': 18591.81, 'Details': 'View'}, 
  {'Trade Date': '2012-08-17', 'Funding Date': '2012-08-18', 'Maturity Date': '2019-07-19', 'Advance Number': 381915.0, 'Advance Type':     'FRC', 'Current Par ($)': 150000000.0, 'Interest Rate (%)': 2.01, 'Next Interest Payment Date': '2019-02-28', 'Accrued Interest ($)':   8053.12, 'Estimated Next Interest Payment ($)': 6589.29, 'Details': 'View'}
   ...]
 ```
