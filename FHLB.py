@@ -352,7 +352,7 @@ class Client():
 			)
 		)
 		
-		tables = ['standard','capacity','securities_backed','capacity']
+		table_order = ['standard','capacity','securities_backed','capacity']
 		
 		for i,table in enumerate(tables):
 			doc = html.fromstring(table.get_attribute('innerHTML'))
