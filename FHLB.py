@@ -11,6 +11,9 @@ from datetime import datetime
 from collections import defaultdict
 import itertools
 
+from config import SERVICE_ARGS, PHANTOM_JS_PATH
+from utils import mapt, partition
+
 class Client():
 	
 	base_url = 'https://member.fhlbsf.com'
@@ -318,22 +321,49 @@ class Client():
 				res[date] = daily_obs
 			return res
 
-	def get_fhlb_capacity():
-		"""returns list showing capacity values as of close of prior bus day"""
+	def get_fhlb_capacity(self,as_of_date):
+		'''
+		Reflects borrowing capacity for the `as_of_date`, going back 12 months on
+		a month-end basis.
 
-		self.driver.get('https://member.fhlbsf.com/reports/borrowing-capacity')
-		table = WebDriverWait(self.driver, 15).until(
-			EC.presence_of_all_elements_located((By.XPATH,
-			 "//section[@class='standard-credit-borrowing-capacity-tables report-tables-section']"+
-			 "//table[@class='report-table report-sub-table'][position() <= 3]")))
-		docs = mapt(html.fromstring,[t.get_attribute('innerHTML') for t in table])
-		tabledata = [el for l in [d.xpath('//td//text()') for d in docs] for el in l]
-		data = mapt(format_text, tabledata[1::2])
-		#Total starting BC pre deductions is in a separate table.  To avoid pulling
-		#this table in just for the sake of one data point, calculate it by adding back
-		# deductions
-		calculated_total_bc = data[3] + sum(data[0:3])
-		return [PRIOR_BUS_DAY_HOLIDAYS, calculated_total_bc] + data + [INSERT_DT_TIME]
+		Loan collateral reflects intraday processing of Mortgage Collateral Updates.
+		Market value and all other data is as of prior business day close.
+
+		:returns: TBD
+		:rtype: TBD
+		'''
+
+		self._validate_date(as_of_date)
+
+		borrowing_capacity_endpoint = 'borrowing-capacity'
+		params = urlencode({'as_of_date':as_of_date})
+
+		borrowing_capacity_url = urljoin(
+			self.reports_url,
+			borrowing_capacity_endpoint
+		)
+		
+		self.driver.get(borrowing_capacity_url + '?' + params)
+		
+		tables = WebDriverWait(self.driver, 15).until(
+			EC.presence_of_all_elements_located(
+				(By.XPATH,"//table[contains(@class,'report-table report-sub-table')" 
+				 + " or contains(@class,'report-table report-parent-table')]")
+			)
+		)
+		
+		tables = ['standard','capacity','securities_backed','capacity']
+		
+		for i,table in enumerate(tables):
+			doc = html.fromstring(table.get_attribute('innerHTML'))
+			header = doc.xpath('.//th//text()')
+			data   = doc.xpath('.//td//text()')
+			if i == 0: # hack - first table missing one value in footer
+				data = data[:-1] + [None] + data[-1:]
+			record_size = len(header) or 2
+			recs = partition(record_size,mapt(self.format_text,data))
+			print(recs)
+
 
 	@staticmethod
 	def format_text(text):
@@ -356,13 +386,3 @@ class Client():
 			return '-'.join([year,month,day])
 		else:
 			return text
-
-def mapt(f,*args):
-	return tuple(map(f,*args))
-
-def partition_all(n,data):
-	return [data[i:i+n] for i in range(0,len(data),n)]
-
-def partition(n,data):
-	return [data[i:i+n] for i in range(0,len(data),n) if len(data[i:i+n]) == n]
-
