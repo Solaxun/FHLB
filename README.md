@@ -49,10 +49,10 @@ FHLB.sta_account('2019-02-01','2019-02-26')
 FHLB.current_rates()
 
 # output
-{'standard credit vrc': [{'Advance Maturity': 'Overnight/Open', 'Advance Rate (%)': 2.18}], 
- 'standard credit frc': [{'Advance Maturity': '1 Month', 'Advance Rate (%)': 2.19}, 
-                         {'Advance Maturity': '2 Months', 'Advance Rate (%)': 2.21}, 
-						 {...}...], 
+{'standard credit vrc':              [{'Advance Maturity': 'Overnight/Open', 'Advance Rate (%)': 2.18}], 
+ 'standard credit frc':              [{'Advance Maturity': '1 Month', 'Advance Rate (%)': 2.19}, 
+                                      {'Advance Maturity': '2 Months', 'Advance Rate (%)': 2.21}, 
+			              {...}...], 
  'standard adjustable rate credit' : [{...}]}
 
 # get historical indicative rates 
