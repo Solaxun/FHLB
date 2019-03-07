@@ -19,7 +19,7 @@ Since there is no official API yet, the data is pulled by scraping the website -
 Unfortunately try as I may, I was unable to find the actual endpoints where the data lives, e.g. those endpoints hit internally by the FHLB when they receive a request and pass it along to their server.  In order to retrieve data from the FHLB website, I'm using `selenium` with the `phantomJS` headless browser to simulate actual browser actions.  Browser automation is not the fastest way to retrieve data - everything you do is performed on one thread, synchronously, using one `WebDriver`. Creating a `WebDriver` instance and logging in takes some time, so the first request you make will take somewhere around 10-20 seconds.  Subsequent requests happen considerably faster since the `WebDriver` has already logged in and that point and simply needs to jump to new URL's.  Given that most of the data reflects historical information, I don't paritcularly view this as a limitation since we are not interested in processing data in real-time, however it is something I wanted to point out in case you may be wondering why the requests seem slow to start. In the future I may explore a multiple `WebDriver` approach where each `WebDriver` is on a different thread, distributing the workload across those thread-specific drivers. However, since most of the time is spent initially creating the `WebDriver` I'm not certain how much this will benefit overall execution time.  
 
 ## Examples
-Now that the caveats are out of the way, lets walk through a few examples of pulling data for your institution.
+Now that the caveats are out of the way, lets walk through a few examples of pulling data for your institution.  Any numbers below are purely for example and not intended to reflect meaningful balances or rates.
 
 ##### Initialize the client with website username and password
 ```python
@@ -32,26 +32,154 @@ FHLB = Client(username,password)
 FHLB.advances('2019-02-01')
 
 # output
-[{'Trade Date': '2011-05-30', 'Funding Date': '2011-06-01', 'Maturity Date': '2019-06-15', 'Advance Number': 192511.0, 'Advance Type': 'FRC', 'Current Par ($)': 100000.0, 'Interest Rate (%)': 1.23, 'Next Interest Payment Date': '2019-02-08', 'Accrued Interest ($)':   1835.15, 'Estimated Next Interest Payment ($)': 18591.81, 'Details': 'View'}, 
- {'Trade Date': '2012-08-17', 'Funding Date': '2012-08-18', 'Maturity Date': '2019-07-19', 'Advance Number': 381915.0, 'Advance Type':     'FRC', 'Current Par ($)': 150000000.0, 'Interest Rate (%)': 2.01, 'Next Interest Payment Date': '2019-02-28', 'Accrued Interest ($)':    8053.12, 'Estimated Next Interest Payment ($)': 6589.29, 'Details': 'View'} ...]
+[  
+   {  
+      'Trade Date':'2011-05-17',
+      'Funding Date':'2011-05-18',
+      'Maturity Date':'2015-05-17',
+      'Advance Number':329646.0,
+      'Advance Type':'FRC',
+      'Current Par ($)':125000000.0,
+      'Interest Rate (%)':1.15,
+      'Next Interest Payment Date':'2015-05-17',
+      'Accrued Interest ($)':35183.15,
+      'Estimated Next Interest Payment ($)':38913.3,
+      'Details':'View'
+   },
+   {  
+      'Trade Date':'2011-01-17',
+      'Funding Date':'2011-01-18',
+      'Maturity Date':'2015-01-17',
+      'Advance Number':329646.0,
+      'Advance Type':'FRC',
+      'Current Par ($)':500000000.0,
+      'Interest Rate (%)':1.18,
+      'Next Interest Payment Date':'2015-01-17',
+      'Accrued Interest ($)':125891.15,
+      'Estimated Next Interest Payment ($)':124381.3,
+      'Details':'View'
+   },
+   ...
+]
  
 # get STA data
 FHLB.sta_account('2019-02-01','2019-02-26')
  
 # output
-{'2019-02-26': [{'Reference Number': '  ', 'Description': 'Balance as of close of business', 'Rates (%)': 1.8, 'Debits ($)': None, 'Credits ($)': None, 'Balance ($)': 123458.18}, 
-                {'Reference Number': 500123.0, 'Description': 'NEW ADVANCE 500123', 'Rates (%)': None, 'Debits ($)': None, 'Credits ($)': 175000000.0, 'Balance ($)': None}...]
-'2019-02-25 : [...]...}
+{  
+   '2018-09-28':[  
+      {  
+         'Reference Number':'  ',
+         'Description':'Balance as of close of business',
+         'Rates (%)':1.28,
+         'Debits ($)':None,
+         'Credits ($)':None,
+         'Balance ($)':153813.18
+      },
+      {  
+         'Reference Number':108512.0,
+         'Description':'LC MAINTENANCE_FEE 2012-85',
+         'Rates (%)':None,
+         'Debits ($)':150.0,
+         'Credits ($)':None,
+         'Balance ($)':None
+      },
+      {  
+         'Reference Number':158913.0,
+         'Description':'LC ISSUANCE_FEE 2013-50',
+         'Rates (%)':None,
+         'Debits ($)':99.0,
+         'Credits ($)':None,
+         'Balance ($)':None
+      },
+      {  
+         'Reference Number':853218.0,
+         'Description':'SECURITY SAFEKEEPING FEE',
+         'Rates (%)':None,
+         'Debits ($)':28.1,
+         'Credits ($)':None,
+         'Balance ($)':None
+      }
+   ],
+   ...
+}
 
 # get current indicative borrowing rates
 FHLB.current_rates()
 
 # output
-{'standard credit vrc':              [{'Advance Maturity': 'Overnight/Open', 'Advance Rate (%)': 2.18}], 
- 'standard credit frc':              [{'Advance Maturity': '1 Month', 'Advance Rate (%)': 2.19}, 
-                                      {'Advance Maturity': '2 Months', 'Advance Rate (%)': 2.21}, 
-			              {...}...], 
- 'standard adjustable rate credit' : [{...}]}
+{  
+   'standard credit vrc':[  
+      {  
+         'Advance Maturity':'Overnight/Open',
+         'Advance Rate (%)':1.85
+      }
+   ],
+   'standard credit frc':[  
+      {  
+         'Advance Maturity':'1 Month',
+         'Advance Rate (%)':1.79
+      },
+      {  
+         'Advance Maturity':'2 Months',
+         'Advance Rate (%)':1.83
+      },
+      ...
+
+   ],
+   'standard adjustable rate credit':[  
+      {  
+         'Advance Maturity':'1 Year',
+         '1 Month LIBOR':8.0,
+         '3 Month LIBOR':-1.0,
+         '6 Month LIBOR':-10.0,
+         'Daily Prime':-315.0
+      },
+      {  
+         'Advance Maturity':'2 Years',
+         '1 Month LIBOR':15.0,
+         '3 Month LIBOR':0.0,
+         '6 Month LIBOR':-10.0,
+         'Daily Prime':-450.0
+      },
+      ...
+   ],
+   'securities-backed credit vrc':[  
+      {  
+         'Advance Maturity':'Overnight/Open',
+         'Advance Rate (%)':1.78
+      }
+   ],
+   'securities-backed credit frc':[  
+      {  
+         'Advance Maturity':'1 Month',
+         'Advance Rate (%)':1.15
+      },
+      {  
+         'Advance Maturity':'2 Months',
+         'Advance Rate (%)':1.23
+      },
+     ...
+   ],
+   'securities-backed adjustable rate credit':[  
+      {  
+         'Advance Maturity':'1 Year',
+         '1 Month LIBOR':5.0,
+         '3 Month LIBOR':-8.0,
+         '6 Month LIBOR':-15.0
+      },
+      {  
+         'Advance Maturity':'2 Years',
+         '1 Month LIBOR':8.0,
+         '3 Month LIBOR':-9.0,
+         '6 Month LIBOR':-10.0
+      },
+    ...
+   ],
+   'Settlement/Transaction Account (STA)':{  
+      'Effective Rate for Prior Business Day (%)':'1.82000'
+   }
+}
 
 # get historical indicative rates 
 # output varies slightly for different collateral_type and credit_type combination
@@ -63,7 +191,141 @@ FHLB.historical_rates(
 )
 
 # output
-{'2019-02-01': {'1 mo': 2.57, '2 mo': 2.58, '3 mo': 2.58, '6 mo': 2.6, '1 yr': 2.61, '2 yr': 2.66, '3 yr': 2.68, '5 yr': 2.75, '7 yr': 2.99,'10 yr': 3.24, '15 yr': 3.48, '20 yr': 3.66, '30 yr': 3.86}, 
- '2019-02-04': {'1 mo': 2.57, '2 mo': 2.58, '3 mo': 2.58, '6 mo': 2.61, '1 yr': 2.64, '2 yr': 2.71, '3 yr': 2.74, '5 yr': 2.82, '7 yr': 3.07, '10 yr': 3.3, '15 yr': 3.55, '20 yr': 3.73, '30 yr': 3.89
- ...}
+{  
+   '2019-02-01':{  
+      '1 mo':2.57,
+      '2 mo':2.58,
+      '3 mo':2.58,
+      '6 mo':2.6,
+      '1 yr':2.61,
+      '2 yr':2.66,
+      '3 yr':2.68,
+      '5 yr':2.75,
+      '7 yr':2.99,
+      '10 yr':3.24,
+      '15 yr':3.48,
+      '20 yr':3.66,
+      '30 yr':3.86
+   },
+   '2019-02-04':{  
+      '1 mo':2.57,
+      '2 mo':2.58,
+      '3 mo':2.58,
+      '6 mo':2.61,
+      '1 yr':2.64,
+      '2 yr':2.71,
+      '3 yr':2.74,
+      '5 yr':2.82,
+      '7 yr':3.07,
+      '10 yr':3.3,
+      '15 yr':3.55,
+      '20 yr':3.73,
+      '30 yr':3.89      
+    ...
+   }
+ 
+# get borrowing capacity - either current-day or month-end going back 12 months
+# calling with no argument defaults to current day
+FHLB.borrowing_capacity(date='2019-02-28') 
+
+# output
+{  
+   'collateral':
+   {  
+      'RESIDENTIAL - ARMs':{  
+         'Count':15831.0,
+         'Original Amount ($)':18283192013.0,
+         'Unpaid Principal Balance ($)':15358101715.0,
+         'Market Value ($)':14658914761.0,
+         'BC/UPB (%)':88.0,
+         'Borrowing Capacity ($)':12899844990.0
+      },
+      'SECONDS':{  
+         ....
+      },
+      'RESIDENTIAL - FIXED':{  
+         ...
+      },
+      'RESIDENTIAL FIRST LIEN HELOCs':{  
+         ...
+      },
+      'MULTIFAMILY - ARMs':{  
+         ...
+      },
+      'COMMERCIAL':{  
+         ...
+      },
+      'MULTIFAMILY - FIXED':{  
+         ...
+      },
+      'RESIDENTIAL NEG AM':{  
+         ...
+      },
+      'Totals':{  
+         ...
+      }
+   }   ),
+   'capacity':
+   {  
+      'Less Excluded Blanket Lien Borrowing Capacity':0.0,
+      'Less Excluded Bank Borrowing Capacity':0.0,
+      'Less Excluded Regulatory Borrowing Capacity':0.0,
+      'Net Loan Collateral Borrowing Capacity':15184081473.0,
+      'Plus Securities Borrowing Capacity':0.0,
+      'Total Borrowing Capacity':15184081473.0,
+      'Less Advances':5000000000.0,
+      'Less Letters of Credit':769316791.0,
+      'Less SWAP Collateral Required':0.0,
+      'Less Cover SBC Type Deficiencies':0.0,
+      'Less Potential Prepayment Fees':0.0,
+      'Less Other Collateral Required':0.0,
+      'Less MPF CE Collateral Required':0.0,
+      'Remaining Borrowing Capacity':9949230265.0
+   }   )
+}),
+'securities_backed':
+{  
+   'collateral':
+   {  
+      'AA':{  
+         'Total Market Value ($)':0.0,
+         'Total Borrowing Capacity ($)':0.0,
+         'Advances ($)':0.0,
+         'Covered by Standard Credit ($)':0.0,
+         'Excess ($)':0.0,
+         'Total ($)':0.0
+      },
+      'AAA':{  
+         'Total Market Value ($)':0.0,
+         'Total Borrowing Capacity ($)':0.0,
+         'Advances ($)':0.0,
+         'Covered by Standard Credit ($)':0.0,
+         'Excess ($)':0.0,
+         'Total ($)':0.0
+      },
+      'Agency':{  
+         'Total Market Value ($)':0.0,
+         'Total Borrowing Capacity ($)':0.0,
+         'Advances ($)':0.0,
+         'Covered by Standard Credit ($)':0.0,
+         'Excess ($)':0.0,
+         'Total ($)':0.0
+      },
+      'Totals':{  
+         'Total Market Value ($)':0.0,
+         'Total Borrowing Capacity ($)':0.0,
+         'Advances ($)':0.0,
+         'Covered by Standard Credit ($)':0.0,
+         'Excess ($)':0.0,
+         'Total ($)':0.0
+      }
+   }   ),
+   'capacity':
+   {  
+      'Less Other Collateral Required':0.0,
+      'Less Excluded Regulatory Borrowing Capacity':0.0,
+      'Remaining Borrowing Capacity':0.0
+   }   )
+})
+})
 ```
