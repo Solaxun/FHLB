@@ -321,16 +321,16 @@ class Client():
 				res[date] = daily_obs
 			return res
 
-	def get_fhlb_capacity(self,as_of_date):
+	def capacity(self,as_of_date):
 		'''
-		Reflects borrowing capacity for the `as_of_date`, going back 12 months on
-		a month-end basis.
+		Reflects borrowing capacity for the month-end `as_of_date`. 
+		History is available going back back 12 months.
 
 		Loan collateral reflects intraday processing of Mortgage Collateral Updates.
 		Market value and all other data is as of prior business day close.
 
 		:returns: TBD
-		:rtype: TBD
+		:rtype: dict of nested dicts
 		'''
 
 		self._validate_date(as_of_date)
@@ -352,18 +352,46 @@ class Client():
 			)
 		)
 		
-		table_order = ['standard','capacity','securities_backed','capacity']
+		# trick to allow infinite nesting of defaultdict- thanks StackOverflow
+		tree = lambda: defaultdict(tree)
+		res  = tree()
 		
 		for i,table in enumerate(tables):
 			doc = html.fromstring(table.get_attribute('innerHTML'))
-			header = doc.xpath('.//th//text()')
+			headers = doc.xpath('.//th//text()')
 			data   = doc.xpath('.//td//text()')
-			if i == 0: # hack - first table missing one value in footer
+			if i == 0: # hack - first table missing 2nd to last value in footer
 				data = data[:-1] + [None] + data[-1:]
-			record_size = len(header) or 2
+			record_size = len(headers) or 2
 			recs = partition(record_size,mapt(self.format_text,data))
-			print(recs)
+			section = 'capacity' if i in [1,2,3,5] else 'collateral'
+			credit_program = 'standard' if i in range(4) else 'securities_backed'
+			for rec in recs:
+				collateral_type, *info = rec
+				if headers:
+					entry = dict(zip(headers[1:],info))
+				else:
+					entry = info[0]
+				res[credit_program][section][collateral_type] = entry
+		return res
+	
+	def letters_of_credit(self):
+		'''
+		Reflects current status of letters of credit.
 
+		:returns: [{'LC Number':2081-10, 'Beneficiary': 'inst name', ...}
+				   {'LC Number':2081-10, 'Beneficiary': 'inst name', ...}...]
+		:rtype: list of dicts
+		'''
+		
+		loc_url = urljoin(self.base_url,'letters-of-credit/manage')
+		self.driver.get(loc_url)
+		table = self._webdriver_get_xpath(15,'//table')
+		doc = html.fromstring(table.get_attribute('innerHTML'))
+		data =  [self.format_text(d.strip()) 
+				 for d in doc.xpath('//td//text()') if d != '\n']
+		headers = doc.xpath('//th//text()')
+		return [dict(zip(headers,rec)) for rec in partition(len(headers),data)]
 
 	@staticmethod
 	def format_text(text):
@@ -374,6 +402,7 @@ class Client():
 			return None
 		elif re.match('(\$*\d+[\.,]*)+\d*\Z',text):
 			return float(text.replace(',','').replace('$',''))
+		# negative currency - strip parens and negate result
 		elif text.startswith('('):
 			return Client.format_text(text[1:-1]) * -1
 		elif text == 'N/A':
