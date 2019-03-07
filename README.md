@@ -230,102 +230,83 @@ FHLB.borrowing_capacity(date='2019-02-28')
 
 # output
 {  
-   'collateral':
-   {  
-      'RESIDENTIAL - ARMs':{  
-         'Count':15831.0,
-         'Original Amount ($)':18283192013.0,
-         'Unpaid Principal Balance ($)':15358101715.0,
-         'Market Value ($)':14658914761.0,
-         'BC/UPB (%)':88.0,
-         'Borrowing Capacity ($)':12899844990.0
+   'standard':{  
+      'collateral':{  
+         'RESIDENTIAL - ARMs':{  
+            'Count':15831.0,
+            'Original Amount ($)':18283192013.0,
+            'Unpaid Principal Balance ($)':15358101715.0,
+            'Market Value ($)':14658914761.0,
+            'BC/UPB (%)':88.0,
+            'Borrowing Capacity ($)':12899844990.0
+         },
+         'SECONDS':{  
+            ....
+         },
+         'RESIDENTIAL - FIXED':{  
+            ...
+         },
+         'RESIDENTIAL FIRST LIEN HELOCs':{  
+            ...
+         },
+         'MULTIFAMILY - ARMs':{  
+            ...
+         },
+         'COMMERCIAL':{  
+            ...
+         },
+         'MULTIFAMILY - FIXED':{  
+            ...
+         },
+         'RESIDENTIAL NEG AM':{  
+            ...
+         },
+         'Totals':{  
+            ...
+         }
       },
-      'SECONDS':{  
-         ....
-      },
-      'RESIDENTIAL - FIXED':{  
-         ...
-      },
-      'RESIDENTIAL FIRST LIEN HELOCs':{  
-         ...
-      },
-      'MULTIFAMILY - ARMs':{  
-         ...
-      },
-      'COMMERCIAL':{  
-         ...
-      },
-      'MULTIFAMILY - FIXED':{  
-         ...
-      },
-      'RESIDENTIAL NEG AM':{  
-         ...
-      },
-      'Totals':{  
-         ...
+      'capacity':{  
+         'Less Excluded Blanket Lien Borrowing Capacity':0.0,
+         'Less Excluded Bank Borrowing Capacity':0.0,
+         'Less Excluded Regulatory Borrowing Capacity':0.0,
+         'Net Loan Collateral Borrowing Capacity':15184081473.0,
+         'Plus Securities Borrowing Capacity':0.0,
+         'Total Borrowing Capacity':15184081473.0,
+         'Less Advances':5000000000.0,
+         'Less Letters of Credit':769316791.0,
+         'Less SWAP Collateral Required':0.0,
+         'Less Cover SBC Type Deficiencies':0.0,
+         'Less Potential Prepayment Fees':0.0,
+         'Less Other Collateral Required':0.0,
+         'Less MPF CE Collateral Required':0.0,
+         'Remaining Borrowing Capacity':9949230265.0
       }
-   }   ),
-   'capacity':
-   {  
-      'Less Excluded Blanket Lien Borrowing Capacity':0.0,
-      'Less Excluded Bank Borrowing Capacity':0.0,
-      'Less Excluded Regulatory Borrowing Capacity':0.0,
-      'Net Loan Collateral Borrowing Capacity':15184081473.0,
-      'Plus Securities Borrowing Capacity':0.0,
-      'Total Borrowing Capacity':15184081473.0,
-      'Less Advances':5000000000.0,
-      'Less Letters of Credit':769316791.0,
-      'Less SWAP Collateral Required':0.0,
-      'Less Cover SBC Type Deficiencies':0.0,
-      'Less Potential Prepayment Fees':0.0,
-      'Less Other Collateral Required':0.0,
-      'Less MPF CE Collateral Required':0.0,
-      'Remaining Borrowing Capacity':9949230265.0
-   }   )
-}),
-'securities_backed':
-{  
-   'collateral':
-   {  
-      'AA':{  
-         'Total Market Value ($)':0.0,
-         'Total Borrowing Capacity ($)':0.0,
-         'Advances ($)':0.0,
-         'Covered by Standard Credit ($)':0.0,
-         'Excess ($)':0.0,
-         'Total ($)':0.0
+   },
+   'securities_backed':{  
+      'collateral':{  
+         'AA':{  
+            'Total Market Value ($)':0.0,
+            'Total Borrowing Capacity ($)':0.0,
+            'Advances ($)':0.0,
+            'Covered by Standard Credit ($)':0.0,
+            'Excess ($)':0.0,
+            'Total ($)':0.0
+         },
+         'AAA':{  
+            ...
+         },
+         'Agency':{  
+            ...
+         },
+         'Totals':{  
+            ...
+         }
       },
-      'AAA':{  
-         'Total Market Value ($)':0.0,
-         'Total Borrowing Capacity ($)':0.0,
-         'Advances ($)':0.0,
-         'Covered by Standard Credit ($)':0.0,
-         'Excess ($)':0.0,
-         'Total ($)':0.0
-      },
-      'Agency':{  
-         'Total Market Value ($)':0.0,
-         'Total Borrowing Capacity ($)':0.0,
-         'Advances ($)':0.0,
-         'Covered by Standard Credit ($)':0.0,
-         'Excess ($)':0.0,
-         'Total ($)':0.0
-      },
-      'Totals':{  
-         'Total Market Value ($)':0.0,
-         'Total Borrowing Capacity ($)':0.0,
-         'Advances ($)':0.0,
-         'Covered by Standard Credit ($)':0.0,
-         'Excess ($)':0.0,
-         'Total ($)':0.0
+      'capacity':{  
+         'Less Other Collateral Required':0.0,
+         'Less Excluded Regulatory Borrowing Capacity':0.0,
+         'Remaining Borrowing Capacity':0.0
       }
-   }   ),
-   'capacity':
-   {  
-      'Less Other Collateral Required':0.0,
-      'Less Excluded Regulatory Borrowing Capacity':0.0,
-      'Remaining Borrowing Capacity':0.0
-   }   )
-})
-})
+   }
+}
 ```
