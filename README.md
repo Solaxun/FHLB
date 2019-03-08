@@ -318,4 +318,32 @@ FHLB.borrowing_capacity(date='2019-02-28')
       }
    }
 }
+
+# current letters of credit
+FHLB.letters_of_credit()
+
+# output
+[  
+   {  
+      'LC Number':'2005-018',
+      'Beneficiary':'Moneybags bank, 707..',
+      'Current Amount ($)':18351038.1,
+      'Issue Date':'2012-01-15',
+      'Expiration Date':'2015-01-15',
+      'Annual Maintenance Charge (bps)':3.0,
+      'CICA Credit Program':'ACE',
+      'Actions':'VIEW PDF'
+   },
+   {  
+      'LC Number':'2003-018',
+      'Beneficiary':'Broke bank, 707..',
+      'Current Amount ($)':100.0,
+      'Issue Date':'2011-01-15',
+      'Expiration Date':'2011-01-16',
+      'Annual Maintenance Charge (bps)':15.0,
+      'CICA Credit Program':'ACE',
+      'Actions':'VIEW PDF'
+   },
+   ...
+]
 ```
