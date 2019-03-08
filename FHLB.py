@@ -10,6 +10,7 @@ from urllib.parse import urljoin, urlencode
 from datetime import datetime
 from collections import defaultdict
 import itertools
+from dateutil.relativedelta import relativedelta
 
 from config import SERVICE_ARGS, PHANTOM_JS_PATH
 from utils import mapt, partition
@@ -45,12 +46,7 @@ class Client():
 		:returns: logged in instance of webdriver
 		:rtype: WebDriver
 		'''
-
-		self.driver = webdriver.PhantomJS(
-			executable_path = PHANTOM_JS_PATH,
-			service_args = SERVICE_ARGS
-		)
-
+		self.driver = self._init_driver()
 		self.driver.get(login_url)
 		login_input = self.driver.find_element_by_id('user_username')
 		password_input = self.driver.find_element_by_id('user_password')
@@ -59,6 +55,15 @@ class Client():
 		login_button = self.driver.find_element_by_name('commit')
 		login_button.click()
 		return self.driver
+	
+	def _init_driver(self):
+		path = PHANTOM_JS_PATH or 'PhantomJS'
+		service_args = None if not SERVICE_ARGS else SERVICE_ARGS
+		driver = webdriver.PhantomJS(
+			executable_path = path,
+			service_args = service_args
+		)
+		return driver
 
 	def advances(self,as_of_date):
 		'''
@@ -129,9 +134,7 @@ class Client():
 			partition(7,sta_data),
 			lambda record: record[0]
 		)
-		# for k,v in sta_data:
-		# 	for x in v:
-		# 		print(k,list(zip(headers[1:],x[1:])))
+
 		res = defaultdict(list)
 		for date, records_per_date in sta_data:
 			for record in records_per_date:
@@ -150,6 +153,16 @@ class Client():
 			raise e
 		return date
 
+	def is_monthend(self,date):
+		date = datetime.strptime(date,'%Y-%m-%d')
+		nextday = date + relativedelta(days=1)
+		if date.month == 12:
+			valid_month_end = nextday.month == 1
+		else:
+			valid_month_end = nextday.month == date.month + 1
+		if not valid_month_end:
+			raise AttributeError('{} is not a month-end!'.format(date))
+	
 	def current_rates(self):
 		'''
 		Reflects price indications as of 6:00 am PT on the current business day and STA
@@ -183,9 +196,6 @@ class Client():
 		rate_tables = {}
 		for i, credit_type in enumerate(tables):
 			table = div_html.xpath("//table[@id='DataTables_Table_{}']/tbody".format(i))
-			# lost hours here... the "." forces context to just those in subelements
-			# not sure how without it the whole tree is retained given we are already
-			# dealing with only the table element matched above - find out later 
 			text = table[0].xpath('.//td//text()') 
 			records = [x.strip() for x in text if x.strip()]
 			# dependent on table order in the website - if that changes, so should this
@@ -321,7 +331,7 @@ class Client():
 				res[date] = daily_obs
 			return res
 
-	def capacity(self,as_of_date):
+	def borrowing_capacity(self,as_of_date=None):
 		'''
 		Reflects borrowing capacity for the month-end `as_of_date`. 
 		History is available going back back 12 months.
@@ -332,8 +342,13 @@ class Client():
 		:returns: TBD
 		:rtype: dict of nested dicts
 		'''
-
-		self._validate_date(as_of_date)
+		today = datetime.now().strftime('%Y-%m-%d')
+		if as_of_date is None:
+			as_of_date = today
+		else:
+			self._validate_date(as_of_date)
+			if as_of_date != today:
+				self.is_monthend(as_of_date)
 
 		borrowing_capacity_endpoint = 'borrowing-capacity'
 		params = urlencode({'as_of_date':as_of_date})
@@ -352,7 +367,6 @@ class Client():
 			)
 		)
 		
-		# trick to allow infinite nesting of defaultdict- thanks StackOverflow
 		tree = lambda: defaultdict(tree)
 		res  = tree()
 		
@@ -415,3 +429,9 @@ class Client():
 			return '-'.join([year,month,day])
 		else:
 			return text
+# todo - reports that only go back 'n' months or have restrictions around month-end availability etc
+# will not have the option to select incorrect dates on the site, but if you send a request with
+# date query parameters outside those range, you'll just get zeroes back.  Guard against this.
+
+
+	
