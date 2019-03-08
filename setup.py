@@ -10,7 +10,7 @@ setup(
     url='http://pypi.python.org/pypi/FHLB/',
     license='MIT.txt',
     description='API Interface to Federal Home Loan Bank of San Francisco.',
-    long_description=open('README.md').read(),
+    # long_description=open('README.md').read(),
     install_requires=[
         "selenium",
         "lxml",
