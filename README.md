@@ -1,8 +1,12 @@
-# FHLB - WIP
+# FHLB SF API
+
 Ongoing work to implement an API interface to the Federal Home Loan Bank of San Francisco's website.
 
 ## Rationale
 The Federal Home Loan Bank of San Francisco provides access via it's website to a plethora of member-bank data, however there is currently no programmatic interface to access this data.  Several reports are available in Excel/CSV format or PDF format, but this still requires logging into the website, pulling down the data, and parsing it before any work can be done.  This project is meant to wrap certain portions of the website in a programmer friendly API simlar to what it may look like as a REST API.
+
+## Installation
+You can install this package either with `pip install fhlb`, or clone this repository and run `python setup.py install` from the top level directory where `setup.py` is located.
 
 ## Limitations
 #### Limited Coverage of Available Data
@@ -16,29 +20,32 @@ There are of course, many more reports and further many more sections of the web
 #### Fragility
 Since there is no official API yet, the data is pulled by scraping the website - similar to what mint.com or other financial aggregators have done in the past when there are no API's available.  The consequence is that if the site changes, it will break this program requiring an update.  Aggregators like mint.com have a team of people to keep their program in sync with providers, whereas for this project you have just me :)
 #### Speed of Execution
-Unfortunately try as I may, I was unable to find the actual endpoints where the data lives, e.g. those endpoints hit internally by the FHLB when they receive a request and pass it along to their server.  In order to retrieve data from the FHLB website, I'm using `selenium` with the `phantomJS` headless browser to simulate actual browser actions.  Browser automation is not the fastest way to retrieve data - everything you do is performed on one thread, synchronously, using one `WebDriver`. Creating a WebDriver instance and logging in takes some time, so the first request you make will take somewhere around 10-20 seconds.  Subsequent requests happen considerably faster since the driver has already logged in and that point and simply needs to jump to new URL's.  Given that most of the data reflects historical information, I don't paritcularly view this as a limitation since we are not interested in processing data in real-time, however it is something I wanted to point out in case you may be wondering why the requests seem slow to start. In the future I may explore a multiple WebDriver approach where each driver is on a different thread, distributing the workload across those thread-specific drivers. However, since most of the time is spent initially creating the driver I'm not certain how much this will benefit overall execution time.  
+Unfortunately try as I may, I was unable to find the actual endpoints where the data lives, e.g. those endpoints hit internally by the FHLB when they receive a request and pass it along to their server.  In order to retrieve data from the FHLB website, I'm using `selenium` with the `phantomJS` headless browser to simulate actual browser actions.  Browser automation is not the fastest way to retrieve data - everything you do is performed on one thread, synchronously, using one `WebDriver`. Creating a `WebDriver` instance and logging in takes some time, so the first request you make will take somewhere around 10-20 seconds.  Subsequent requests happen considerably faster since the `WebDriver` has already logged in and that point and simply needs to jump to new URL's.  Given that most of the data reflects historical information, I don't paritcularly view this as a limitation since we are not interested in processing data in real-time, however it is something I wanted to point out in case you may be wondering why the requests seem slow to start. In the future I may explore a multiple `WebDriver` approach where each `WebDriver` is on a different thread, distributing the workload across those thread-specific drivers. However, since most of the time is spent initially creating the `WebDriver` I'm not certain how much this will benefit overall execution time.  
 ## Dependencies
 There is one external dependency you will need to download: `PhantomJS`.  If you're on a mac, you can run `brew install phantomjs`.  For other operating systems, visit the [PhantomJS website](http://phantomjs.org/download.html) and download the appropriate file.
 
-## Configuration (optional)
+## Configuration
 In the `config.py` file, there are two variables present, each of which may be left empty: 
  - `SERVICE_ARGS`
     -  list of arguments passed to the webdriver and handles things like proxy auth, log file path, ssl protcol, etc.  
  - `PHANTOM_JS_PATH`
-    -  location of the `PhantomJS` executable, if left empty will default to `path`. If the executable is not on your path you must provide an explicit location
+    -  location of the `PhantomJS` executable, if left empty will default to `path`. If the executable is not on your path you must provide the location of the `.exe` (full path including the extension).
 
 ## Examples
 Provided below are example requests and sample response data.  Any figures referenced below are strictly for examples sake and not meant to reflect meaningful data (e.g. rates, balances, etc. are made up).
 
 ##### Initialize the client with website username and password
 ```python
+import fhlb
+
 # username and password correspond to the websites login page
-FHLB = Client(username,password)
+client = fhlb.Client(username,password)
+
 ```
 ##### Perform requests corresponding to reporting tab
 ```python
 # request outstanding advances
-FHLB.advances('2019-02-01')
+client.advances('2019-02-01')
 
 # output
 [  
@@ -72,7 +79,7 @@ FHLB.advances('2019-02-01')
 ]
  
 # get STA data
-FHLB.sta_account('2019-02-01','2019-02-26')
+client.sta_account('2019-02-01','2019-02-26')
  
 # output
 {  
@@ -114,7 +121,7 @@ FHLB.sta_account('2019-02-01','2019-02-26')
 }
 
 # get current indicative borrowing rates
-FHLB.current_rates()
+client.current_rates()
 
 # output
 {  
@@ -192,7 +199,7 @@ FHLB.current_rates()
 
 # get historical indicative rates 
 # output varies slightly for different collateral_type and credit_type combination
-FHLB.historical_rates(
+client.historical_rates(
 	'2019-02-01',
 	'2019-02-26',
 	collateral_type='standard',
@@ -235,7 +242,7 @@ FHLB.historical_rates(
  
 # get borrowing capacity - either current-day or month-end going back 12 months
 # calling with no argument defaults to current day
-FHLB.borrowing_capacity(date='2019-02-28') 
+client.borrowing_capacity(date='2019-02-28') 
 
 # output
 {  
@@ -318,32 +325,4 @@ FHLB.borrowing_capacity(date='2019-02-28')
       }
    }
 }
-
-# current letters of credit
-FHLB.letters_of_credit()
-
-# output
-[  
-   {  
-      'LC Number':'2005-018',
-      'Beneficiary':'Moneybags bank, 707..',
-      'Current Amount ($)':18351038.1,
-      'Issue Date':'2012-01-15',
-      'Expiration Date':'2015-01-15',
-      'Annual Maintenance Charge (bps)':3.0,
-      'CICA Credit Program':'ACE',
-      'Actions':'VIEW PDF'
-   },
-   {  
-      'LC Number':'2003-018',
-      'Beneficiary':'Broke bank, 707..',
-      'Current Amount ($)':100.0,
-      'Issue Date':'2011-01-15',
-      'Expiration Date':'2011-01-16',
-      'Annual Maintenance Charge (bps)':15.0,
-      'CICA Credit Program':'ACE',
-      'Actions':'VIEW PDF'
-   },
-   ...
-]
 ```

@@ -1,16 +1,16 @@
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name='FHLB',
-    version='0.1.0',
+    version='0.1.2',
     author='Mark C. Woodworth',
     author_email='markcwoodworth@gmail.com',
-    packages=[],
+    packages=['fhlb'],
     scripts=[],
     url='http://pypi.python.org/pypi/FHLB/',
     license='MIT.txt',
     description='API Interface to Federal Home Loan Bank of San Francisco.',
-    # long_description=open('README.md').read(),
+    long_description=open('README.md').read(),
     install_requires=[
         "selenium",
         "lxml",
