@@ -12,8 +12,8 @@ from collections import defaultdict
 import itertools
 from dateutil.relativedelta import relativedelta
 
-from config import SERVICE_ARGS, PHANTOM_JS_PATH
-from utils import mapt, partition
+from fhlb.config import SERVICE_ARGS, PHANTOM_JS_PATH
+from fhlb.utils import mapt, partition
 
 class Client():
 	

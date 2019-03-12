@@ -6,5 +6,6 @@ FHLB.egg-info/dependency_links.txt
 FHLB.egg-info/requires.txt
 FHLB.egg-info/top_level.txt
 fhlb/__init__.py
+fhlb/config.py
 fhlb/fhlb.py
 fhlb/utils.py
