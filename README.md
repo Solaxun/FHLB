@@ -1,6 +1,6 @@
 # FHLB SF API
 
-Ongoing work to implement an API interface to the Federal Home Loan Bank of San Francisco's website.
+API interface to a subset of the Federal Home Loan Bank of San Francisco's reporting capabilities via their website.
 
 ## Rationale
 The Federal Home Loan Bank of San Francisco provides access via it's website to a plethora of member-bank data, however there is currently no programmatic interface to access this data.  Several reports are available in Excel/CSV format or PDF format, but this still requires logging into the website, pulling down the data, and parsing it before any work can be done.  This project is meant to wrap certain portions of the website in a programmer friendly API simlar to what it may look like as a REST API.
